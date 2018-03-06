@@ -8,6 +8,21 @@
 % Output:matrix/array containing the instance data
 function y = read_instance(fname, decimate)
 
+% Check number of input arguments
+if nargin < 2
+    error('Not enough input arguments')
+elseif nargin > 2 
+    error('Too many input arguments')
+end
+
+% Check data type of input arguments
+if exist(fname, 'file') <> 2
+    error('File does not exist')
+end
+if decimate <> floor(decimate)
+    error('Argument decimate is not an integer')
+end
+
 [~,name,ext] = fileparts(fname);
 
 if strcmp(ext, '.avi')
