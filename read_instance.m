@@ -16,14 +16,14 @@ elseif nargin > 2
 end
 
 % Check data type of input arguments
-if exist(fname, 'file') <> 2
+if exist(fname, 'file') ~= 2
     error('File does not exist')
 end
-if decimate <> floor(decimate)
+if decimate ~= floor(decimate)
     error('Argument decimate is not an integer')
 end
 
-[~,name,ext] = fileparts(fname);
+[~,~,ext] = fileparts(fname);
 
 if strcmp(ext, '.avi')
     % File is a video file
