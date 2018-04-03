@@ -26,15 +26,8 @@ parfor i = 1:length(Files)
 
      fname = char(strcat(rootDirectory,currentFile,situation(j),'/yawning.avi'));
      allDescriptors=extractPMLDescriptor(fname);
-     Descriptors{j} = allDescriptors;
-     %%cd(strcat(currentFile,char((situation(j)))))
      parsave([fileparts(fname) '/yawning.mat'], allDescriptors);
      
-     %allDescriptors=extractPMLDescriptor(char(strcat(strcat(rootDirectory,currentFile),strcat(situation(j),'/rectifiedsleepyCombination.avi'))));
-     %cd(strcat(currentFile,char(situation(j))))
-     %save('SleepyCombination.mat',char('allDescriptors'))
-     %cd ..
-     %cd .. 
      ('end')
    end
    Files(i)
