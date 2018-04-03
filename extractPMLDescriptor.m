@@ -10,7 +10,7 @@ blocksize = heightOfImage/pyramid_level;
 % Initialization of variables
 video = VideoReader(path);
 TotalFrames = video.NumberOfFrames;
-allDescriptors = zeros(floor(TotalFrames/decimate), DescriptorLength);
+allDescriptors = zeros(floor((TotalFrames-1)/decimate)+1, DescriptorLength);
 PMLDescriptors = zeros(1, DescriptorLength);
 numberOfFrame = 1;
 video = VideoReader(path); % It is necessary to reload the video because 
