@@ -6,93 +6,67 @@ clc
 close all
 clear all
 
-Files=dir()
-Files={Files([Files.isdir]).name}
-Files=Files(~ismember(Files,{'.','..'}))
-rootDirectory=[pwd '\']
+Files = dir();
+Files = {Files([Files.isdir]).name};
+Files = Files(~ismember(Files,{'.','..'}));
+Files = Files(~ismember(Files,{'evaluation'}));
+rootDirectory = [pwd '/'];
 
-saveDescriptorsInThisWay='modulo10ALL'
-fullDescriptors=[]
-allLabels=[]
-%saveDesriptorsInThisWay='module10OnlyDetectedFaces'
-for i =1:length(Files)-1
-   currentFile=char(Files(i));
-   situation='night_noglasses';
-   currentFile=[currentFile '/'];
+ProcessedFileNames = {'nonSleepyCombination', 'SleepyCombination',...
+    'slowBlinkWithNodding', 'yawning'};
+DetectedFramesFileNames = {'rectifiednonSleepyCombination', ...
+    'rectifiedsleepyCombination', 'slowBlinkWithNodding', 'yawning'};
+LabelsFileNames = {'nonsleepyCombination', 'sleepyCombination',...
+    'slowBlinkWithNodding', 'yawning'};
 
-   currentFile
-   cd(strcat(currentFile,char((situation))));
-   currentFile(end)='_';
-   load 'SleepyCombination.mat';
-   %%%%%%%%%%%%%%%%%%
+fullDescriptors = struct;
+allLabels = struct;
+
+% Process each subject
+for i=1:length(Files)
+    subject = Files{i};
+    situation = dir(subject);
+    situation = {situation([situation.isdir]).name};
+    situation = situation(~ismember(situation,{'.','..'}));
+    subject = [subject '/'];
     
-   allFrames=fileread('rectifiedsleepyCombinationDetection.txt');
-   allLabelsFrames=fileread(strcat(currentFile,'sleepyCombination_drowsiness.txt'));
-   
-   describedFrames=[];
-   labelOfDescribedFrames=[];
-   for i=1:10:length(allLabelsFrames)
-       describedFrames=[describedFrames;str2num(allFrames(i))];
-       labelOfDescribedFrames=[labelOfDescribedFrames;str2num(allLabelsFrames(i))];
-   end
-   if(strcmp(saveDescriptorsInThisWay,'modulo10ALL'))
-       detectedFrames=ones(1,length(describedFrames))==1;
-   elseif(strcmp(saveDescriptorsInThisWay,'module10OnlyDetectedFaces'))
-       detectedFrames=describedFrames==1;
-       
-   end
-   
-   descriptorsThatAreGood=allDescriptors(detectedFrames,:);
-
-
-   labelsThatAreGood=labelOfDescribedFrames(detectedFrames);
-   
-   labelsThatAreGood;
-   fullDescriptors=[fullDescriptors;descriptorsThatAreGood];
-   allLabels=[allLabels;labelsThatAreGood];
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-   
-   
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   load 'nonSleepyCombination.mat';
-   allFrames=fileread('rectifiednonSleepyCombinationDetection.txt');
-   allLabelsFrames=fileread(strcat(currentFile,'nonsleepyCombination_drowsiness.txt'));
-size(allFrames)
-
-   size(allLabelsFrames)
-
-  describedFrames=[];
-   labelOfDescribedFrames=[];
-   for i=1:10:length(allLabelsFrames)
-       describedFrames=[describedFrames;str2num(allFrames(i))];
-       labelOfDescribedFrames=[labelOfDescribedFrames;str2num(allLabelsFrames(i))];
-       
-
-   end
-   
-   if(strcmp(saveDescriptorsInThisWay,'modulo10ALL'))
-   detectedFrames=ones(1,length(describedFrames))==1;
-   elseif(strcmp(saveDescriptorsInThisWay,'module10OnlyDetectedFaces')) 
-   detectedFrames=describedFrames==1; 
-   end
-   
-   size(allFrames)
-   descriptorsThatAreGood=allDescriptors(detectedFrames,:);
-
-   labelsThatAreGood=labelOfDescribedFrames(detectedFrames);
-
-   
-   fullDescriptors=[fullDescriptors;descriptorsThatAreGood];
-   allLabels=[allLabels;labelsThatAreGood];
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- cd ..
-   cd ..   
-
- 
-end 
- 
-
-save(strcat(saveDescriptorsInThisWay,strcat(situation,'AllTrainingDescriptors.mat')),'fullDescriptors','allLabels')
-
-
+    % Process each situation
+    for j=1:length(situation)
+        if ~isfield(fullDescriptors, situation{j})
+            fullDescriptors.(situation{j}) = [];
+            allLabels.(situation{j}) = [];
+        end
+        % Process each subject state file
+        for k=1:length(ProcessedFileNames)       
+            % Build data file name
+            fname_data = [rootDirectory subject situation{j} '/'...
+                ProcessedFileNames{k} '.mat'];
+            % Build face-detected frames file name
+            fname_DetectedFrames = [rootDirectory subject situation{j} '/' ...
+                DetectedFramesFileNames{k} 'Detection.txt'];
+            % Build labels file name
+            fname_labels= [rootDirectory subject situation{j}  '/' ...
+                subject(1:end-1) '_' LabelsFileNames{k} '_drowsiness.txt'];
+            
+            % Load data
+            load(fname_data);
+            DetectedFrames = read_instance(fname_DetectedFrames, 10);
+            labels = read_instance(fname_labels, 10);
+            
+            % Remove all data frames and labels without a detected face
+            allDescriptors = allDescriptors(logical(DetectedFrames),:);
+            labels = labels(logical(DetectedFrames));
+            % Add descriptors and labels
+            fullDescriptors.(situation{j}) = [fullDescriptors.(situation{j}); allDescriptors];
+            %fullDescriptors = [fullDescriptors; allDescriptors];
+            allLabels.(situation{j}) = [allLabels.(situation{j}), labels];
+            %allLabels = [allLabels, labels];
+        end
+        SaveName = ['Subsample10' situation{j} 'AllTrainingDescriptors.mat'];
+    end
+    fprintf('Subject %s processed\n', subject(1:end-1));
+end
+clear DetectedFrames labels fname_data fname_DetectedFrames fname_labels
+clear situation ProcessedFileNames DetectedFramesFileNames LabelsFileNames Files
+clear i j k rootDirectory
 
