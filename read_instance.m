@@ -17,7 +17,7 @@ end
 
 % Check data type of input arguments
 if exist(fname, 'file') ~= 2
-    error('File does not exist')
+    error(['File does not exist: ' fname])
 end
 if decimate ~= floor(decimate)
     error('Argument decimate is not an integer')
@@ -28,8 +28,9 @@ end
 if strcmp(ext, '.avi')
     % File is a video file
     v = VideoReader(fname);
-    L = v.Duration * v.FrameRate; % number of video frames
-    video = zeros(v.Height, v.Width, 3, ceil(L/decimate), 'uint8');
+    L = v.NumberOfFrames;  % number of video frames
+    v = VideoReader(fname);
+    video = zeros(v.Height, v.Width, 3, floor(L/decimate), 'uint8');
     i = 0;
     while hasFrame(v)
         frame = readFrame(v);
@@ -43,7 +44,7 @@ if strcmp(ext, '.avi')
 elseif strcmp(ext, '.txt')
     text = fileread(fname);
     L = length(text); % number of video frames
-    labels = zeros(1,ceil(L/decimate));
+    labels = zeros(1,floor(L/decimate));
     for i=1:length(text)
         if ~mod(i-1,decimate)
             labels((i-1)/decimate+1) = str2double(text(i));
