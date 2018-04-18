@@ -54,19 +54,34 @@ for i=1:length(Files)
             labels = read_instance(fname_labels, 10);
             
             % Remove all data frames and labels without a detected face
-            allDescriptors = allDescriptors(logical(DetectedFrames),:);
-            labels = labels(logical(DetectedFrames));
-            % Add descriptors and labels
-            fullDescriptors.(situation{j}) = [fullDescriptors.(situation{j}); allDescriptors];
-            %fullDescriptors = [fullDescriptors; allDescriptors];
-            allLabels.(situation{j}) = [allLabels.(situation{j}), labels];
-            %allLabels = [allLabels, labels];
+            if size(allDescriptors,1) >= size(DetectedFrames)
+                allDescriptors = allDescriptors(logical(DetectedFrames),:);
+                labels = labels(logical(DetectedFrames));
+                % Add descriptors and labels
+                fullDescriptors.(situation{j}) = [fullDescriptors.(situation{j}); allDescriptors];
+                %fullDescriptors = [fullDescriptors; allDescriptors];
+                allLabels.(situation{j}) = [allLabels.(situation{j}), labels];
+                %allLabels = [allLabels, labels];
+            else
+                fprintf('File not processed: %s\n', fname_data);
+            end
         end
-        SaveName = ['Subsample10' situation{j} 'AllTrainingDescriptors.mat'];
+        %SaveName = ['Subsample10' situation{j} 'AllTrainingDescriptors.mat'];
     end
     fprintf('Subject %s processed\n', subject(1:end-1));
 end
+for i=1:length(situation)
+    SaveName = ['Subsample10' situation{i} 'AllTrainingDescriptors.mat'];
+    descriptors  = fullDescriptors.(situation{i});
+    labels = allLabels.(situation{i});
+    parsaveDataset(SaveName, descriptors, labels');
+end
 clear DetectedFrames labels fname_data fname_DetectedFrames fname_labels
 clear situation ProcessedFileNames DetectedFramesFileNames LabelsFileNames Files
-clear i j k rootDirectory
+clear i j k rootDirectory descriptors labels
 
+function parsaveDataset(fname, descriptors, labels)
+
+save(fname, 'descriptors', 'labels');
+
+end
