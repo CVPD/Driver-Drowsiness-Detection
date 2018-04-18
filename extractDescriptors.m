@@ -5,14 +5,11 @@ close all
 clear all
 warning('off','all')
 warning
-Files=dir()
-Files={Files([Files.isdir]).name}
-Files=Files(~ismember(Files,{'.','..'}));
-%Files=['023' '024' '031' '032' '033' '034' '035' '036']
-rootDirectory=[pwd '/'];
+% Load current directory and extract all folder names
+Files=dir();
+Files = {Files([Files.isdir]).name};
+Files = Files(~ismember(Files,{'.','..'}));
 
-%Files=cell(1,1)
-%Files{1}='036'
 for i =1:length(Files)
    currentFile=char(Files(i))
    situation=dir(currentFile);
@@ -40,3 +37,23 @@ for i =1:length(Files)
    
 end
 
+parfor i = 1:length(Files)
+   currentFile = char(Files(i));
+   situation = dir(currentFile);
+   situation = {situation([situation.isdir]).name};
+   situation = situation(~ismember(situation,{'.','..'}));
+   currentFile=[currentFile '/'];
+   
+   Descriptors = cell(1, length(situation));
+   for j=1:length(situation)  
+     ('start')
+
+     fname = char(strcat(rootDirectory,currentFile,situation(j),'/slowBlinkWithNodding.avi'));
+     allDescriptors=extractPMLDescriptor(fname);
+     parsave([fileparts(fname) '/slowBlinkWithNodding.mat'], allDescriptors);
+      
+     ('end')
+   end
+   Files(i)
+   
+end
