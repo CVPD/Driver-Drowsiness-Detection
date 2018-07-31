@@ -1,4 +1,4 @@
-function [TestAccuracy, TrainAccuracy, InfoStruct] = trainSVMClassifier(...
+function [TestAccuracy, TrainAccuracy, info_struct] = trainSVMClassifier(...
     descriptors_train, labels_train, descriptors_test, labels_test, varargin)
 
 default_kernel_scale = 0.5:0.5:12;
@@ -42,7 +42,7 @@ TrainAccuracy = zeros(F, K);
 
 train_length = size(training, 2);
 test_length = size(test, 2);
-InfoStruct = struct;
+info_struct = struct;
 
 if verbose
     disp(['Start: ' datestr(datetime('now'))]);
@@ -51,6 +51,7 @@ end
 C_cell = cell(F, K);        % Confusion matrix
 order_cell = cell(F, K);    % Confusion matrix
 SVMModels = cell(F,K);
+CrossVal = cell{F,K};
 for index_j = 1:F
     Learn= training(:, 1:ceil(0.01 * fisher_index(index_j) * train_length));
     Test= test(:, 1:ceil(0.01 * fisher_index(index_j) * test_length));
@@ -80,14 +81,14 @@ end
 [maxAccuracy, maxIndex] = max(TestAccuracy(:));
 [idxMaxRow, idxMaxCol] = ind2sub(size(TestAccuracy), maxIndex);
 
-InfoStruct.kernel = kernelSVM;
-InfoStruct.kernelScale = kernelScale;
-InfoStruct.FisherPerc = fisher_index;
-InfoStruct.confusion.confusion_matrix = C_cell;
-InfoStruct.confusion.order = order_cell;
-InfoStruct.max_coordinates = [fisher_index(idxMaxRow), kernelScale(idxMaxCol)];
-InfoStruct.SVMModels = SVMModels;
-InfoStruct.CrossVal = CrossVal;
+info_struct.kernel = kernelSVM;
+info_struct.kernelScale = kernelScale;
+info_struct.FisherPerc = fisher_index;
+info_struct.confusion.confusion_matrix = C_cell;
+info_struct.confusion.order = order_cell;
+info_struct.max_coordinates = [fisher_index(idxMaxRow), kernelScale(idxMaxCol)];
+info_struct.SVMModels = SVMModels;
+info_struct.CrossVal = CrossVal;
 if verbose
     disp(['Max Accuracy: ' num2str(maxAccuracy)]);
     disp(['End: ' datestr(datetime('now'))]);
