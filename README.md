@@ -5,7 +5,7 @@
 ### **Main Pipeline Example**
 Preprocess, reduce and train classifier for one PML technique. It makes use of the following functions:
 
-1. PreprocessDataset: gathers all videos from each training/test dataset subject and situation and applies the desired PML preprocessing. 
+1. PreprocessDataset: collects all videos from each training/test dataset subject and situation and applies the desired PML preprocessing. 
     
 2. BuildTrainDataset: Builds a dataset from a file created by PreprocessDataset
     
@@ -13,7 +13,7 @@ Preprocess, reduce and train classifier for one PML technique. It makes use of t
 
 4. ReduceDataset: Reduces a dataset using the structure returned by DatasetPCA
 
-5. TrainReducedDataset:loads the reduced training and test datasets and build SVM classifiers modifying the number of training features, the SVM kernel parameters and the SVM C parameter.
+5. TrainReducedDataset: loads the reduced training and test datasets and build SVM classifiers modifying the number of training features, the SVM kernel parameters and the SVM C parameter.
     A file with relevance data from the result of each trained classifier is saved as *Results_ReducedPCA'PCA_Ratio''kernel'_Sub'subsampling'.mat*. 
     This file contains a data structure with the following fields:
       * situation
